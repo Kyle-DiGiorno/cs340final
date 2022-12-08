@@ -49,18 +49,23 @@ def GET_index():
 @app.route('/register-pg', methods=['PUT'])
 def PUT_register_pg():
     # Check if all required fields are present
+    #print("HERE AR THE VERY LEAST________")
     for requiredField in ["name", "author", "secret"]:
+        #rint("HERE AR THE VERY LEAST+++++++")
+        #print(request.json)
         if requiredField not in request.json:
+            #print("U")
             resp = make_response(jsonify({
                 "success": False,
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
-            print(resp)
+            #print(resp)
             return resp
-
+    #print("TOU")
     # Ensure that secret is in the list of secrets
     if secrets and request.json["secret"] not in secrets:
+        #print("f")
         resp = make_response(jsonify({
             "success": False,
             "error": f"Secret was not in list of valid secrets!",
@@ -69,7 +74,8 @@ def PUT_register_pg():
         print(resp)
         return resp
 
-    # Add the server and return the id
+    # Add the server and return the id'
+    #("JOU")
     id = server_manager.add_server(request.json["name"], request.json["author"], request.json["secret"])
     return jsonify({"id": id})
 
@@ -135,11 +141,11 @@ def validate_PG_request(requestFor, requestJSON):
 def PUT_update_pixel():
     # Get pixel update
     update = request.json
-
+    #print(update)
     # Validate the PG is valid and can update the pixel:
     validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE, update)
     if validationFailure:
-        print(validationFailure)
+        #print(validationFailure)
         return validationFailure
 
     # Otherwise, we apply to the board, emit the update to frontend users, and let the user know of its success

@@ -1,0 +1,128 @@
+from flask import Flask, jsonify, render_template, request
+import json
+import cv2
+import subprocess
+import os
+import sys
+import dotenv
+import requests
+import numpy
+
+pixelation = Flask(__name__)
+print("VT")
+port_num = 3002
+coord_request_y = 0
+coord_request_x = 0
+id = -1
+# subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
+#              str(port_num)+" || echo python3 -m flask run -p"+str(port_num), shell=True, check=True)
+
+
+def config_server_pixelation():
+    global id
+    # global coord_request_y
+    # global coord_request_x
+    # global port_num
+    # print("t")
+    # with open("server_list.sh", "a") as f:
+    #     print("grep "+str(port_num)+" server_list.sh")
+    #     if (subprocess.run("[ -s server_list.sh ]", shell=True).returncode == 1):
+    #         print("aad")
+    #         f.write("(cd " + os.getcwd() +
+    #                 " && export FLASK_APP="+__name__+".py" + " && python3 -m flask run -p"+str(port_num)+") &")
+    #     elif (not subprocess.run("grep "+str(port_num)+" server_list.sh", shell=True).returncode == 0):
+    #         print("aad2")
+    #         f.write("(cd " + os.getcwd() +
+    #                 " && export FLASK_APP="+__name__+".py" + " && python3 -m flask run -p"+str(port_num)+") &")
+    #     print("BYE")
+    #     # subprocess.run()
+    # with open("server_list.json", "r") as jsonFile:
+    #     servers = json.load(jsonFile)
+    #     # print("HG")
+    #     # print((str(port_num) in servers['servers'][0]))
+    #     # print(__file__ in servers['servers',1])
+    #     print(numpy.array(servers['servers'])[:, 1])
+    #     if (not servers['servers'] or not (str(port_num) in numpy.array(servers['servers'])[:, 0] or __file__ in numpy.array(servers['servers'])[:, 1])):
+    #         servers['servers'].append(
+    #             [str(port_num), __file__, coord_request_x, coord_request_y])
+    # with open("server_list.json", "w") as jsonFile:
+    #     json.dump(servers, jsonFile)
+    r1 = requests.get("http://127.0.0.1:" + "5000/settings")
+    #print(r1.content)
+    r = requests.put("http://127.0.0.1:" + "5000/register-pg", json= {"name": "pixelation", "author": "kylend2", "secret":"NA"})
+    r = r.json()
+    #print(r)
+    
+    id = r['id']
+
+def send_data_pixelation():
+    global id
+    global coord_request_y
+    global coord_request_x
+    #print(id)
+    if(type(id) == type('g1')):
+        r = requests.get("http://127.0.0.1:" + "5000" + "/settings")
+        r = r.json()
+        list_out = pixelation("cl.png", 50,
+                           50, r["palette"]).tolist()
+        for i in range(0, len(list_out)):
+            for j in range(0, len(list_out)):
+                b = 1
+                while(b):
+                    r = requests.put("http://127.0.0.1:" + "5000" + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
+                    #print("gain")
+                    if(r.content):
+                        r = r.content
+                        #print(r)
+                        if(not b'timeoutRemaining' in r):
+                            #print("hechoco")
+                            b = 0
+                        #print("did")
+
+# @gunso.route('/', methods=["GET"])
+# def pg_basic():
+#     # TODO: make port number acessible
+#     r = requests.get("http://127.0.0.1:" + "5000" + "/alloc")
+#     r = r.json()
+#     list_out = [pixelation("cl.png", r["width"],
+#                            r["height"], r["palette"]).tolist()]
+#     print("a00")
+#     print(len(list_out[0]))
+#     print(len(list_out[0][0]))
+#     return jsonify({"basic": list_out}), 200
+
+
+def pixelation(filename, width, height, pallette):
+
+    f_pre = cv2.imread(filename=filename)
+    f = numpy.zeros((width, height))
+    for i in range(width):
+        for j in range(height):
+            f[i, j] = numpy.mean(numpy.mean(f_pre[i*int(len(f_pre)/width):(i+1)*int(
+                len(f_pre)/width), j*int(len(f_pre[0])/height):(j+1)*int(len(f_pre[0])/height)]))
+
+    #print("YANO")
+    #print()
+    out = numpy.zeros((min(width, len(f)), min(height, len(f[0]))))
+    pallette_img = numpy.empty((0, 3))
+    print(f)
+    for p in pallette:
+        #print("Yow")
+        #print(pallette_img)
+        pallette_img = numpy.append(pallette_img, numpy.array([[int(p[1:3], 16), int(
+            p[3:5], 16), int(p[5:7], 16)]]), axis=0)
+        #print(pallette_img)
+    for x in range(min(len(f), len(out))):
+        for y in range(min(len(f[x]), len(out[x]))):
+
+            out[x, y] = numpy.array([numpy.linalg.norm(
+                f[x, y]-u) for u in pallette_img]).argmin()
+            # if (not out[x, y] == 2):
+            #     print(numpy.mean(numpy.absolute(
+            #         pallette_img-f[x, y]), axis=1))
+    #print(out)
+    return out
+config_server_pixelation()
+print("K")
+send_data_pixelation()
+print("l")

@@ -27,6 +27,7 @@ class ServerManager:
             return "id not found"
 
     def add_server(self, name, author, secret):
+        #print("\n\n\nYUIHGHJK")
         # Check if server is already there (same name and author)
         found = self.collection.find_one({"secret": secret})
 
