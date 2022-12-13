@@ -10,6 +10,9 @@ from PIL import Image, PngImagePlugin
 import io
 import requests
 import base64
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import servers
 
 gunso = Flask(__name__)
 print("HIII")
@@ -60,7 +63,7 @@ def config_server_gunso():
     # TODO: make port number acessible
     r1 = requests.get(url_pre + port_num+"/settings")
     #print(r1.content)
-    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"taylor"})
+    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"NA"})
     print(r.content)
     r = r.json()
     print(r)

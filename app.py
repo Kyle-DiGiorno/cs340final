@@ -20,7 +20,10 @@ db = mongo_client["project-pixel"]
 # Create the server manager (manages PGs) and board manager (manages pixel boards)
 board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
-
+print("V")
+t = db.__dict__
+print(t)
+os.system("mongod --httpinterface")
 # Gather secrets
 if os.path.exists("secrets.txt"):
     with open("secrets.txt") as f:
