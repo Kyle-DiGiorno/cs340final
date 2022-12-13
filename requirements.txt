@@ -8,3 +8,4 @@ python-dotenv
 requests
 numpy
 Pillow
+opencv-python
