@@ -54,8 +54,8 @@ def config_server_pixelation():
     #             [str(port_num), __file__, coord_request_x, coord_request_y])
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
-    r1 = requests.get(url_pre + adm_port_num+"/settings")
-    #print(r1.content)
+    r1 = requests.get(url_pre + adm_port_num+"/")
+    print(r1.content)
     r = requests.put(url_pre + adm_port_num+"/register-pg", json= {"name": "pixelation", "author": "kylend2", "secret":"NA"})
     r = r.json()
     #print(r)
