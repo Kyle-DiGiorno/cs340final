@@ -61,6 +61,7 @@ def config_server_gunso():
     r1 = requests.get(url_pre + port_num+"/settings")
     #print(r1.content)
     r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"stable diffusion base 7756363"})
+    print(r.content)
     r = r.json()
     print(r)
     
