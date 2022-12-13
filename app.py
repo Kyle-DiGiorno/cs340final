@@ -2,7 +2,7 @@ from os import getenv
 import os
 import json
 
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from pymongo import MongoClient
 from flask import Flask, jsonify, make_response, render_template, request, send_file
 from flask_socketio import SocketIO
@@ -11,7 +11,7 @@ from servers import ServerManager
 from boards import BoardManager
 
 # Load the environment variables
-load_dotenv()
+#load_dotenv()
 
 # Connect to the database
 mongo_client = MongoClient(getenv("MONGO_HOST") or "127.0.0.1")
