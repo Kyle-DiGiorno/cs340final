@@ -30,7 +30,7 @@ class ServerManager:
         #print("\n\n\nYUIHGHJK")
         # Check if server is already there (same name and author)
         found = self.collection.find_one({"secret": secret})
-
+        print(list(self.collection.find()))
         # If it is, we just return the ID for that one; no need to create a new database entry
         if found:
             return str(found["_id"])

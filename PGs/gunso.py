@@ -20,7 +20,7 @@ port_num = 3001
 coord_request_y = 50
 coord_request_x = 50
 id = -1
-url_pre = "http://127.0.0.1:"
+url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
 url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
 sd_url = "https://a9aa35612caba338.gradio.app"
 port_num = "34999"#5000
@@ -61,7 +61,7 @@ def config_server_gunso():
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
     # TODO: make port number acessible
-    r1 = requests.get(url_pre + port_num+"/register-pg")
+    r1 = requests.get(url_pre + port_num+"/")
     print(r1.content)
     print(r1)
     print("UIN")
