@@ -16,8 +16,8 @@ coord_request_x = 0
 id = -1
 url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
 url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#http://127.0.0.1:"
-adm_port_num = 34999#5000
-vm_port_num = 5000
+adm_port_num = "34999"#5000
+vm_port_num = "5000"
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
 #              str(port_num)+" || echo python3 -m flask run -p"+str(port_num), shell=True, check=True)
 
