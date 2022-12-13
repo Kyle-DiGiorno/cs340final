@@ -14,12 +14,19 @@ port_num = 3002
 coord_request_y = 0
 coord_request_x = 0
 id = -1
+url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
+url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#http://127.0.0.1:"
+adm_port_num = 34999#5000
+vm_port_num = 5000
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
 #              str(port_num)+" || echo python3 -m flask run -p"+str(port_num), shell=True, check=True)
 
 
 def config_server_pixelation():
     global id
+    global adm_port_num
+    global vm_port_num
+    global url_pre
     # global coord_request_y
     # global coord_request_x
     # global port_num
@@ -47,9 +54,9 @@ def config_server_pixelation():
     #             [str(port_num), __file__, coord_request_x, coord_request_y])
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
-    r1 = requests.get("http://127.0.0.1:" + "5000/settings")
+    r1 = requests.get(url_pre + adm_port_num+"/settings")
     #print(r1.content)
-    r = requests.put("http://127.0.0.1:" + "5000/register-pg", json= {"name": "pixelation", "author": "kylend2", "secret":"NA"})
+    r = requests.put(url_pre + adm_port_num+"/register-pg", json= {"name": "pixelation", "author": "kylend2", "secret":"NA"})
     r = r.json()
     #print(r)
     
@@ -59,17 +66,28 @@ def send_data_pixelation():
     global id
     global coord_request_y
     global coord_request_x
+    global url_pre
+    global url_target
+    global adm_port_num
+    global vm_port_num
     #print(id)
     if(type(id) == type('g1')):
-        r = requests.get("http://127.0.0.1:" + "5000" + "/settings")
+        r = requests.get(url_pre + adm_port_num + "/settings")
         r = r.json()
-        list_out = pixelation("cl.png", 50,
-                           50, r["palette"]).tolist()
-        for i in range(0, len(list_out)):
-            for j in range(0, len(list_out)):
+        list_out = pixelation("cl.png", 20,
+                           20, r["palette"]).tolist()
+        s = requests.get(url_pre + adm_port_num + "/settings")
+        s = s.json()
+        print(s)
+        for i in range(0, min(len(list_out),s['height']-coord_request_y)):
+            for j in range(0, min(len(list_out),s['width']-coord_request_x)):
                 b = 1
-                while(b):
-                    r = requests.put("http://127.0.0.1:" + "5000" + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
+                
+                g = requests.get(url_pre + adm_port_num + "/frontend-pixels")
+                #print(g)
+                g = g.json()
+                while(b and not g['pixels'][coord_request_y+i][coord_request_x+j] == list_out[i][j]):
+                    r = requests.put(url_pre + adm_port_num + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
                     #print("gain")
                     if(r.content):
                         r = r.content
@@ -95,6 +113,8 @@ def send_data_pixelation():
 def pixelation(filename, width, height, pallette):
 
     f_pre = cv2.imread(filename=filename)
+    width = min(width,f_pre.shape[0])
+    height = min(height,f_pre.shape[1])
     f = numpy.zeros((width, height))
     for i in range(width):
         for j in range(height):

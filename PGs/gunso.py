@@ -4,8 +4,12 @@ import subprocess
 import os
 import sys
 import dotenv
+import cv2
 import numpy
+from PIL import Image, PngImagePlugin
+import io
 import requests
+import base64
 
 gunso = Flask(__name__)
 print("HIII")
@@ -13,6 +17,8 @@ port_num = 3001
 coord_request_y = 50
 coord_request_x = 50
 id = -1
+url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
+port_num = 34999#5000
 
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
 #              str(port_num)+" || echo python3 -m flask run -p"+str(port_num), shell=True, check=True)
@@ -20,6 +26,7 @@ id = -1
 
 def config_server_gunso():
     global id
+    global url_pre
     # global coord_request_y
     # global coord_request_x
     # global port_num
@@ -48,9 +55,9 @@ def config_server_gunso():
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
     # TODO: make port number acessible
-    r1 = requests.get("http://127.0.0.1:" + "5000/settings")
+    r1 = requests.get(url_pre + "5000/settings")
     #print(r1.content)
-    r = requests.put("http://127.0.0.1:" + "5000/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"NA"})
+    r = requests.put(url_pre + "5000/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"NA"})
     r = r.json()
     #print(r)
     
@@ -60,14 +67,41 @@ def send_data_gunso():
     global id
     global coord_request_y
     global coord_request_x
+    global url_pre
     print(id)
     if(type(id) == type('g1')):
-        list_out = [[3]*200]*200
-        for i in range(0, len(list_out)):
-            for j in range(0, len(list_out)):
+        #list_out = [[3]*20]*20
+        s = requests.get(url_pre + "5000" + "/settings")
+        s = s.json()
+        payload = {
+            "prompt": "maltese puppy",
+            "steps": 5
+        }
+        
+
+        sd = requests.post(url_pre +"7777/sdapi/v1/txt2img", json=payload)
+        sd = sd.json()
+        for i in sd['images']:
+            image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
+            image.save('output.png')
+        list_out = pixelation('output.png', 20,
+                           20, s["palette"]).tolist()
+        #print(sd)
+        #sd= sd.json()
+        print('bye')
+        #print(sd.content)
+        print('hi')
+        
+        print(s)
+        for i in range(0, min(len(list_out),s['height']-coord_request_y)):
+            for j in range(0, min(len(list_out),s['width']-coord_request_x)):
                 b = 1
-                while(b):
-                    r = requests.put("http://127.0.0.1:" + "5000" + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
+                
+                g = requests.get(url_pre + "5000" + "/frontend-pixels")
+                #print(g)
+                g = g.json()
+                while(b and not g['pixels'][coord_request_y+i][coord_request_x+j] == list_out[i][j]):
+                    r = requests.put(url_pre + "5000" + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
                     #print("loss")
                     if(r.content):
                         r = r.content
@@ -83,6 +117,38 @@ def send_data_gunso():
 #     print("a")
 #     print(list_out[0][0][0])
 #     return jsonify({"basic": list_out}), 200
+def pixelation(filename, width, height, pallette):
+
+    f_pre = cv2.imread(filename=filename)
+    width = min(width,f_pre.shape[0])
+    height = min(height,f_pre.shape[1])
+    f = numpy.zeros((width, height))
+    for i in range(width):
+        for j in range(height):
+            f[i, j] = numpy.mean(numpy.mean(f_pre[i*int(len(f_pre)/width):(i+1)*int(
+                len(f_pre)/width), j*int(len(f_pre[0])/height):(j+1)*int(len(f_pre[0])/height)]))
+
+    #print("YANO")
+    #print()
+    out = numpy.zeros((min(width, len(f)), min(height, len(f[0]))))
+    pallette_img = numpy.empty((0, 3))
+    print(f)
+    for p in pallette:
+        #print("Yow")
+        #print(pallette_img)
+        pallette_img = numpy.append(pallette_img, numpy.array([[int(p[1:3], 16), int(
+            p[3:5], 16), int(p[5:7], 16)]]), axis=0)
+        #print(pallette_img)
+    for x in range(min(len(f), len(out))):
+        for y in range(min(len(f[x]), len(out[x]))):
+
+            out[x, y] = numpy.array([numpy.linalg.norm(
+                f[x, y]-u) for u in pallette_img]).argmin()
+            # if (not out[x, y] == 2):
+            #     print(numpy.mean(numpy.absolute(
+            #         pallette_img-f[x, y]), axis=1))
+    #print(out)
+    return out
 config_server_gunso()
 print("G")
 send_data_gunso()

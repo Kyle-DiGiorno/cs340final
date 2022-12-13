@@ -35,6 +35,9 @@ makedirs(TEMP_DIR, exist_ok=True)
 
 PIXEL_RATE = int(getenv("PIXEL_RATE") or random.randint(100, 1000))
 
+BOARD_DISABLED = False
+if getenv("START_DISABLED"):
+    BOARD_DISABLED = True
 
 class BoardManager:
     def __init__(self, db: Database):
@@ -73,6 +76,9 @@ class BoardManager:
         if not self.cache:
             self.cache = self.board.find_one({"current": True})
 
+        if BOARD_DISABLED:
+            return None
+
         # Collect statistics:
         for update in updates:
             self.stats["pixels"] = self.stats["pixels"] + 1
@@ -103,6 +109,7 @@ class BoardManager:
         for update in updates:
             update["time"] = now
         self.updates.insert_many(updates)
+
         return self.stats
 
     def update_current_board(self, row, col, color, author, serverManager, id):
@@ -170,6 +177,24 @@ class BoardManager:
         b = int(hex_color[5:7], 16)
         return (r, g, b)
 
-    def change_pixel_rate(new_rate: int):
+    def change_pixel_rate(self, new_rate: int):
         global PIXEL_RATE
         PIXEL_RATE = new_rate
+        return PIXEL_RATE
+
+    def set_enabled_state(self, is_enabled):
+        global BOARD_DISABLED
+
+        if is_enabled:
+            BOARD_DISABLED = False
+        else:
+            BOARD_DISABLED = True
+
+        return BOARD_DISABLED
+
+    def get_enabled_state(self):
+        global BOARD_DISABLED
+        return not BOARD_DISABLED
+
+    def get_stats(self):
+        return self.stats

@@ -22,10 +22,10 @@ board_manager = BoardManager(db)
 server_manager = ServerManager(db, board_manager)
 
 # Gather secrets
-if os.path.exists("secrets.json"):
-    secrets_file = open("secrets.json")
-    secrets = set(json.load(secrets_file)["secrets"])
-    secrets_file.close()
+if os.path.exists("secrets.txt"):
+    with open("secrets.txt") as f:
+        secrets = f.readlines()
+    secrets = set([secret.strip() for secret in secrets])
 else:
     secrets = None
 
@@ -44,28 +44,27 @@ def GET_index():
     '''Route for "/" (frontend)'''
     return render_template("index.html")
 
+@app.route('/admin/', methods=['GET'])
+def GET_admin():
+    return render_template("admin.html")
+
 
 # Middleware Methods
 @app.route('/register-pg', methods=['PUT'])
 def PUT_register_pg():
     # Check if all required fields are present
-    #print("HERE AR THE VERY LEAST________")
     for requiredField in ["name", "author", "secret"]:
-        #rint("HERE AR THE VERY LEAST+++++++")
-        #print(request.json)
         if requiredField not in request.json:
-            #print("U")
             resp = make_response(jsonify({
                 "success": False,
                 "error": f"Required field `{requiredField}` not present.",
             }))
             resp.status_code = 400
-            #print(resp)
+            print(resp)
             return resp
-    #print("TOU")
+
     # Ensure that secret is in the list of secrets
     if secrets and request.json["secret"] not in secrets:
-        #print("f")
         resp = make_response(jsonify({
             "success": False,
             "error": f"Secret was not in list of valid secrets!",
@@ -74,17 +73,9 @@ def PUT_register_pg():
         print(resp)
         return resp
 
-    # Add the server and return the id'
-    #("JOU")
+    # Add the server and return the id
     id = server_manager.add_server(request.json["name"], request.json["author"], request.json["secret"])
     return jsonify({"id": id})
-
-
-@app.route('/remove-pg', methods=['DELETE'])
-def DELETE_remove_pg():
-    server_manager.remove_server(request.json["id"])
-    return jsonify({"success": True}), 200
-
 
 
 VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE = 1
@@ -141,37 +132,45 @@ def validate_PG_request(requestFor, requestJSON):
 def PUT_update_pixel():
     # Get pixel update
     update = request.json
-    #print(update)
+
     # Validate the PG is valid and can update the pixel:
     validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_PIXEL_UPDATE, update)
     if validationFailure:
-        #print(validationFailure)
+        print(validationFailure)
         return validationFailure
 
     # Otherwise, we apply to the board, emit the update to frontend users, and let the user know of its success
-    row = update["row"]
-    col = update["col"]
-    color = update["color"]
+    row = int(update["row"])
+    col = int(update["col"])
+    color = int(update["color"])
     id = update["id"]
     author = server_manager.get_author_by_id(id)
     
     stats = board_manager.update_current_board(row, col, color, author, server_manager, id)
     
     # Notify all socket connections of update:
-    sio.emit('pixel update', {
-        'row': row,
-        'col': col,
-        'color': color,
-        'pixels': stats["pixels"],
-        'unnecessaryPixels': stats["unnecessaryPixels"],
-        'author': author
-    })
+    if stats:
+        sio.emit('pixel update', {
+            'row': row,
+            'col': col,
+            'color': color,
+            'pixels': stats["pixels"],
+            'unnecessaryPixels': stats["unnecessaryPixels"],
+            'author': author
+        })
 
-    # Return success:
-    return jsonify({
-        "success": True,
-        "rate": board_manager.get_pixel_rate()
-    }), 200
+        # Return success:
+        return jsonify({
+            "success": True,
+            "rate": board_manager.get_pixel_rate()
+        }), 200
+    else:
+        # Return success:
+        return jsonify({
+            "success": True,
+            "currentlyDisabled": True,
+            "rate": board_manager.get_pixel_rate()
+        }), 200
 
 
 @app.route('/settings', methods=['GET'])
@@ -182,7 +181,10 @@ def GET_settings():
     return jsonify({
         "width": board["width"],
         "height": board["height"],
-        "palette": board["palette"]
+        "palette": board["palette"],
+        "enabled": board_manager.get_enabled_state(),
+        "stats": board_manager.get_stats(),
+        "currentPixelRate": board_manager.get_pixel_rate(),
     })
 
 
@@ -202,6 +204,7 @@ def return_board():
 
 @app.route('/pixels', methods=['GET'])
 def GET_pixels():
+    print("TTTTT")
     # Validate the PG is valid and can update the pixel:
     validationFailure = validate_PG_request(VALIDATE_PG_REQUEST_FOR_BOARD, request.json)
     if validationFailure:
@@ -254,8 +257,18 @@ def POST_change_pixel_rate():
             return resp
 
     # Check token
-    if getenv("CHANGE_PIXEL_RATE_TOKEN") == request.json['token']:
+    if getenv("ADMIN_TOKEN") == request.json['token']:
         board_manager.change_pixel_rate(int(request.json['new_rate']))
+        return "Success", 200
+    else:
+        return "Unauthorized", 401
+
+
+@app.route('/enableBoard', methods=['POST'])
+def POST_enableBoard():
+    # Allow enable only with ADMIN_TOKEN
+    if getenv("ADMIN_TOKEN") and getenv("ADMIN_TOKEN") == request.json['token']:
+        board_manager.set_enabled_state(True)
         return "Success", 200
     else:
         return "Unauthorized", 401
