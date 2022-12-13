@@ -67,6 +67,8 @@ def PUT_register_pg():
     if secrets and request.json["secret"] not in secrets:
         resp = make_response(jsonify({
             "success": False,
+            'a':secrets,
+            'b':request.json["secret"]
             "error": f"Secret was not in list of valid secrets!",
         }))
         resp.status_code = 401
