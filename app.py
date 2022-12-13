@@ -25,6 +25,7 @@ t = db.__dict__
 print(t)
 os.system("mongod --httpinterface")
 # Gather secrets
+
 if os.path.exists("secrets.txt"):
     with open("secrets.txt") as f:
         secrets = f.readlines()
