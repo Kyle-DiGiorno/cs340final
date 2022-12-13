@@ -18,6 +18,8 @@ coord_request_y = 50
 coord_request_x = 50
 id = -1
 url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
+url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
+sd_url = "https://a9aa35612caba338.gradio.app"
 port_num = 34999#5000
 
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
@@ -27,6 +29,7 @@ port_num = 34999#5000
 def config_server_gunso():
     global id
     global url_pre
+    global port_num
     # global coord_request_y
     # global coord_request_x
     # global port_num
@@ -55,9 +58,9 @@ def config_server_gunso():
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
     # TODO: make port number acessible
-    r1 = requests.get(url_pre + "5000/settings")
+    r1 = requests.get(url_pre + port_num+"/settings")
     #print(r1.content)
-    r = requests.put(url_pre + "5000/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"NA"})
+    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"NA"})
     r = r.json()
     #print(r)
     
@@ -68,10 +71,13 @@ def send_data_gunso():
     global coord_request_y
     global coord_request_x
     global url_pre
+    global url_target
+    global port_num
+    global sd_url
     print(id)
     if(type(id) == type('g1')):
         #list_out = [[3]*20]*20
-        s = requests.get(url_pre + "5000" + "/settings")
+        s = requests.get(url_pre + port_num + "/settings")
         s = s.json()
         payload = {
             "prompt": "maltese puppy",
@@ -79,7 +85,7 @@ def send_data_gunso():
         }
         
 
-        sd = requests.post(url_pre +"7777/sdapi/v1/txt2img", json=payload)
+        sd = requests.post(sd_url +"7777/sdapi/v1/txt2img", json=payload)
         sd = sd.json()
         for i in sd['images']:
             image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
@@ -97,11 +103,11 @@ def send_data_gunso():
             for j in range(0, min(len(list_out),s['width']-coord_request_x)):
                 b = 1
                 
-                g = requests.get(url_pre + "5000" + "/frontend-pixels")
+                g = requests.get(url_pre + port_num + "/frontend-pixels")
                 #print(g)
                 g = g.json()
                 while(b and not g['pixels'][coord_request_y+i][coord_request_x+j] == list_out[i][j]):
-                    r = requests.put(url_pre + "5000" + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
+                    r = requests.put(url_pre + port_num + "/update-pixel", json = {"id": id, "row": coord_request_y+i, "col":coord_request_x+j, "color":list_out[i][j]})
                     #print("loss")
                     if(r.content):
                         r = r.content
