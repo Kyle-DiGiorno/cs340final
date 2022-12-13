@@ -61,7 +61,7 @@ def config_server_gunso():
     # with open("server_list.json", "w") as jsonFile:
     #     json.dump(servers, jsonFile)
     # TODO: make port number acessible
-    r1 = requests.get(url_pre + adm_port_num+"/")
+    r1 = requests.get(url_pre + port_num+"/")
     print(r1.content)
     print(r1)
     print("UIN")
