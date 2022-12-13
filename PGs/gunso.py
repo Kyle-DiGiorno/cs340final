@@ -60,7 +60,7 @@ def config_server_gunso():
     # TODO: make port number acessible
     r1 = requests.get(url_pre + port_num+"/settings")
     #print(r1.content)
-    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"stable diffusion base 7756363"})
+    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret":"taylor"})
     print(r.content)
     r = r.json()
     print(r)
