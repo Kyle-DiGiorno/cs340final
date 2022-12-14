@@ -94,7 +94,8 @@ def send_data_gunso():
             "steps": 5
         }
         
-
+        sd_t = requests.get(sd_url)
+        print(sd_t)
         sd = requests.post(sd_url +"/sdapi/v1/txt2img", json=payload)
         print(sd)
         sd = sd.json()
