@@ -68,10 +68,10 @@ def config_server_gunso():
     #print(r1.content)
     #print(r1.)
     print("UIN")
-    print(r1.raw)
+    #print(r1.raw)
     r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret": "PG+a3lsZW5kMg==+XD683YaUBpT1NNAxmk5qRkaJifqIMK"})
-    print(r.content)
-    r = r1.json()
+    #print(r.content)
+    r = r.json()
     print(r)
     
     id = r['id']
