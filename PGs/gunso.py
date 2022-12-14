@@ -22,7 +22,7 @@ coord_request_x = 50
 id = -1
 url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
 url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
-sd_url = "https://a9aa35612caba338.gradio.app"
+sd_url = "https://ba6858ad805d56a4.gradio.app"
 port_num = "34999"#5000
 
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
@@ -95,8 +95,9 @@ def send_data_gunso():
         }
         
 
-        sd = requests.post(sd_url +"7777/sdapi/v1/txt2img", json=payload)
+        sd = requests.post(sd_url +"/sdapi/v1/txt2img", json=payload)
         sd = sd.json()
+        print(sd)
         for i in sd['images']:
             image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
             image.save('output.png')
