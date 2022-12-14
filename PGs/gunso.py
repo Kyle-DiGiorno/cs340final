@@ -23,7 +23,7 @@ id = -1
 url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
 url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
 sd_url = "https://ba6858ad805d56a4.gradio.app"
-port_num = "34999"#5000
+port_num = "34000"#5000
 
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
 #              str(port_num)+" || echo python3 -m flask run -p"+str(port_num), shell=True, check=True)
