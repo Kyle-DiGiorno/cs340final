@@ -62,11 +62,14 @@ def config_server_gunso():
     #     json.dump(servers, jsonFile)
     # TODO: make port number acessible
     r1 = requests.get(url_pre + port_num+"/")
+    f = open("secrets.json", 'r')
+    f2 = f.read()
+    f2 = f2[0]
     #print(r1.content)
     #print(r1.)
     print("UIN")
     print(r1.raw)
-    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret": "Swift"})
+    r = requests.put(url_pre + port_num+"/register-pg", json= {"name": "gunso", "author": "kylend2", "secret": f2})
     print(r.content)
     r = r1.json()
     print(r)
