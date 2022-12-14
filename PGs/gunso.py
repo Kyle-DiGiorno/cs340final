@@ -22,7 +22,7 @@ coord_request_x = 50
 id = -1
 url_pre = "http://fa22-cs340-adm.cs.illinois.edu:"#"http://127.0.0.1:"
 url_target = "fa22-cs340-118.cs.illinois.edu"#http://127.0.0.1:"
-sd_url = "https://ba6858ad805d56a4.gradio.app"
+sd_url = "https://32297198e87d3238.gradio.app"
 port_num = "34000"#5000
 
 # subprocess.run("[ -s server_list.sh ] && echo & python3 -m flask run -p" +
@@ -94,8 +94,8 @@ def send_data_gunso():
             "steps": 5
         }
         
-        sd_t = requests.get(sd_url +"/sdapi")
-        print(sd_t)
+        #sd_t = requests.get(sd_url +"/sdapi/v1/txt2img")
+        #print(sd_t)
         sd = requests.post(sd_url +"/sdapi/v1/txt2img", json=payload)
         print(sd)
         sd = sd.json()
