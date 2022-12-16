@@ -179,3 +179,6 @@ Secrets are used when a PG registers itself. Each PG should have a secret that m
 
 `secrets.json` should include a JSON list with the name "secrets", like this:
 `{"secrets" : ["first", "second", "taylor", "mm isn't here"]}`
+###
+Stable Diffusion:
+download stable diffusion locally and add --api to the COMMAND_LINE_ARGS variable in the webui-user.txt file. Then run navigate a command prompt window to the stable diffusion directory and run webui.bat
